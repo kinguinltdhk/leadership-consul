@@ -48,7 +48,7 @@ public class SimpleClusterFactoryIntegrationTest {
                 }
             });
 
-        latch.await(5, TimeUnit.SECONDS);
+        latch.await(30, TimeUnit.SECONDS);
 
         assertEquals(0, latch.getCount());
     }

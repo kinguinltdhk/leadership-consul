@@ -29,13 +29,20 @@ public class HttpMember implements Member {
     Response response;
     try {
       response = client.newCall(request).execute();
+
+      if (!response.isSuccessful()) {
+        response.close();
+        throw new IOException();
+      }
+
       ObjectMapper objectMapper = new ObjectMapper();
       ElectionResponse res = objectMapper
-          .readValue(response.toString(), ElectionResponse.class);
+          .readValue(response.body().string(), ElectionResponse.class);
 
       return res.getName().equals(properties.getNodeName());
+
     } catch (IOException e) {
-      log.warning("Something went wrong with get leader");
+      log.warning(String.format("Something went wrong with get leader. Cause %s", e.getMessage()));
       return false;
     }
   }
