@@ -4,7 +4,6 @@ apply plugin: "maven"
 group "com.github.kinguinltdhk"
 
 sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -18,10 +17,12 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-core:2.9.0"
     compile "com.fasterxml.jackson.core:jackson-databind:2.9.0"
     compile "io.reactivex:rxjava:1.3.2"
+    compileOnly 'org.projectlombok:lombok:1.18.4'
+    compile 'com.squareup.okhttp3:okhttp:3.12.0'
 
     testCompile "junit:junit:4.12"
-    testCompile "org.mockito:mockito-core:2.10.0"
-    testCompile "org.mockito:mockito-inline:2.9.0"
+    testCompile "org.mockito:mockito-core:2.23.4"
+    testCompile "org.mockito:mockito-inline:2.23.4"
     testCompile "com.palantir.docker.compose:docker-compose-rule-junit4:0.32.1"
 }
 

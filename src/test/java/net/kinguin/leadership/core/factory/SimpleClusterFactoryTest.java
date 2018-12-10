@@ -1,10 +1,16 @@
-package net.kinguin.leadership.consul.factory;
+package net.kinguin.leadership.core.factory;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.kv.KeyValueConsulClient;
 import com.ecwid.consul.v1.session.SessionConsulClient;
-import net.kinguin.leadership.consul.election.Gambler;
-import net.kinguin.leadership.consul.election.Info;
+import net.kinguin.leadership.consul.factory.SimpleConsulClusterFactory;
+import net.kinguin.leadership.core.ElectionMessage;
+import net.kinguin.leadership.core.ElectionState;
+import net.kinguin.leadership.core.Member;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -12,13 +18,8 @@ import org.mockito.MockitoAnnotations;
 import rx.Observable;
 import rx.observers.TestSubscriber;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 public class SimpleClusterFactoryTest {
-    private SimpleClusterFactory clusterFactory;
+    private SimpleConsulClusterFactory clusterFactory;
 
     @Mock
     private SessionConsulClient sessionConsulClient;
@@ -29,19 +30,19 @@ public class SimpleClusterFactoryTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clusterFactory = new SimpleClusterFactory(sessionConsulClient, keyValueConsulClient);
+        clusterFactory = new SimpleConsulClusterFactory(sessionConsulClient, keyValueConsulClient);
     }
 
     @Test
     public void should_return_passive_gambler() throws Exception {
-        Gambler gambler = clusterFactory.mode(SimpleClusterFactory.MODE_SINGLE)
+        Member gambler = clusterFactory.mode(SimpleConsulClusterFactory.MODE_SINGLE)
             .build();
 
         gambler.asObservable()
             .toBlocking()
             .subscribe(i -> {
-                Info n = (Info) i;
-                assertEquals(Gambler.ELECTED_FIRST_TIME, ((Info) i).status);
+                ElectionMessage n = (ElectionMessage) i;
+                assertEquals(ElectionState.ELECTED_FIRST_TIME.name(), ((ElectionMessage) i).status);
             });
     }
 
@@ -56,7 +57,7 @@ public class SimpleClusterFactoryTest {
             .thenReturn(response);
 
         // when
-        Observable activeGambler = clusterFactory.mode(SimpleClusterFactory.MODE_MULTI)
+        Observable activeGambler = clusterFactory.mode(SimpleConsulClusterFactory.MODE_MULTI)
             .build()
             .asObservable();
 

@@ -5,12 +5,14 @@ import com.ecwid.consul.v1.kv.model.PutParams;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.kinguin.leadership.consul.config.ClusterConfiguration;
+import net.kinguin.leadership.core.ElectionMessage;
+import net.kinguin.leadership.core.Member;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
 import java.io.IOException;
 
-public class ActiveGambler implements Runnable, Gambler {
+public class ConsulMember implements Runnable, Member {
     private KeyValueClient consulKVClient;
     private String sessionId;
     private ClusterConfiguration clusterConfiguration;
@@ -20,7 +22,7 @@ public class ActiveGambler implements Runnable, Gambler {
     private String key;
     private ObjectMapper mapper = new ObjectMapper();
 
-    public ActiveGambler(
+    public ConsulMember(
         KeyValueClient consulKVClient,
         String sessionId,
         ClusterConfiguration clusterConfiguration
@@ -43,20 +45,20 @@ public class ActiveGambler implements Runnable, Gambler {
         }
 
         if (false == gotLeadership) {
-            publish(Gambler.NOT_ELECTED);
+            publish(Member.NOT_ELECTED);
 
             if (true == wasLeader) {
-                publish(Gambler.RELEGATION);
+                publish(Member.RELEGATION);
                 wasLeader = false;
             }
 
             return;
         }
 
-        publish(Gambler.ELECTED);
+        publish(Member.ELECTED);
 
         if (false == wasLeader) {
-            publish(Gambler.ELECTED_FIRST_TIME);
+            publish(Member.ELECTED_FIRST_TIME);
             wasLeader = true;
         }
     }
@@ -95,25 +97,25 @@ public class ActiveGambler implements Runnable, Gambler {
     }
 
     private void publish(String status) {
-        Info info = new Info();
-        info.status = status;
+        ElectionMessage electionMessage = new ElectionMessage();
+        electionMessage.status = status;
 
         try {
-            info.vote = leaderLookup();
+            electionMessage.vote = leaderLookup();
         } catch (IOException e) {}
 
-        publisher.onNext(info);
+        publisher.onNext(electionMessage);
     }
 
     private void publish(Exception e) {
-        Info info = new Info();
-        info.status = Gambler.ERROR;
-        info.error = e.getMessage();
+        ElectionMessage electionMessage = new ElectionMessage();
+        electionMessage.status = Member.ERROR;
+        electionMessage.error = e.getMessage();
 
         try {
-            info.vote = leaderLookup();
+            electionMessage.vote = leaderLookup();
         } catch (IOException ioe) {}
 
-        publisher.onNext(info);
+        publisher.onNext(electionMessage);
     }
 }

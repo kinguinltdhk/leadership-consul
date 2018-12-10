@@ -1,10 +1,11 @@
-package net.kinguin.leadership.consul.factory;
+package net.kinguin.leadership.core.factory;
 
 import com.palantir.docker.compose.DockerComposeRule;
 import net.kinguin.leadership.consul.IntegrationTest;
 import net.kinguin.leadership.consul.config.ClusterConfiguration;
-import net.kinguin.leadership.consul.election.Gambler;
-import net.kinguin.leadership.consul.election.Info;
+import net.kinguin.leadership.core.ElectionMessage;
+import net.kinguin.leadership.consul.factory.SimpleConsulClusterFactory;
+import net.kinguin.leadership.core.Member;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -32,16 +33,17 @@ public class SimpleClusterFactoryIntegrationTest {
 
         CountDownLatch latch = new CountDownLatch(2);
 
-        new SimpleClusterFactory()
-            .mode(SimpleClusterFactory.MODE_MULTI)
+        new SimpleConsulClusterFactory()
+            .mode(SimpleConsulClusterFactory.MODE_MULTI)
             .configure(config)
             .debug(true)
             .build()
             .asObservable()
             .subscribe(i -> {
-                Info info = (Info) i;
+                ElectionMessage electionMessage = (ElectionMessage) i;
 
-                if (Gambler.ELECTED_FIRST_TIME.equals(info.status) || Gambler.ELECTED.equals(info.status)) {
+                if (Member.ELECTED_FIRST_TIME.equals(electionMessage.status) || Member.ELECTED.equals(
+                    electionMessage.status)) {
                     latch.countDown();
                 }
             });

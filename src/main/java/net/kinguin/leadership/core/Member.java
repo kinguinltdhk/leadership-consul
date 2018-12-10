@@ -1,8 +1,8 @@
-package net.kinguin.leadership.consul.election;
+package net.kinguin.leadership.core;
 
 import rx.Observable;
 
-public interface Gambler {
+public interface Member {
     String ELECTED_FIRST_TIME = "elected.first";
     String ELECTED = "elected";
     String RELEGATION = "relegation";
