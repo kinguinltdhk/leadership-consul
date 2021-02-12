@@ -102,7 +102,7 @@ public class SimpleConsulClusterFactory extends AbstractClusterFactory {
     }
 
     ConsulMember gambler = new ConsulMember(keyValueConsulClient, sessionId, config);
-    executor.scheduleAtFixedRate(gambler, config.getElection().getFrequency(),
+    executor.scheduleAtFixedRate(gambler, config.getElection().getDelay(),
         config.getElection().getFrequency(), TimeUnit.SECONDS);
 
     verbose(String.format("Vote frequency setup on %s seconds frequency ",
